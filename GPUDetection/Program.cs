@@ -20,26 +20,23 @@ namespace GPUDetection
         {
             Console.OutputEncoding = Encoding.UTF8;
             GPUData gd = new GPUData();
-            gd.Update();
+            string gpucom = "getgpu";
+            while (gpucom == Console.ReadLine().ToLower())
+            {
+               gd.Update();
+            }
+            Console.WriteLine("Input error.please check!");
+            Console.ReadKey();
+
         }
         public class GPUData
         {
             public void Update()
             {
                 CheckGPU();
-                string json = JsonConvert.SerializeObject(GPUlist);
-                string gpucom = "getgpu";
-                string input = Console.ReadLine().ToLower();
-                if (gpucom == input)
-                {
-                    Console.WriteLine(json);
-                }
-                else
-                {
-                    Console.WriteLine("Input error.please check!");
-                }
-
-                Console.ReadKey();
+                string json = JsonConvert.SerializeObject(GPUlist); ;
+                Console.WriteLine(json);
+                GPUlist.Clear();     
             }
 
             public class GPUStates
@@ -56,8 +53,8 @@ namespace GPUDetection
                 if (Type == "GpuAti" || Type == "GpuNvidia")
                 {
                     GP.type = name;
-                    GP.temp = tempvalue + " °C";
-                    GP.speed = fanvalue + " RPM";
+                    GP.temp = tempvalue;
+                    GP.speed = fanvalue;
                 }
                 GPUlist.Add(GP);
             }
