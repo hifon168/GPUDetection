@@ -19,88 +19,61 @@ namespace GPUDetection
         static void Main(string[] args)
         {
             Console.OutputEncoding = Encoding.UTF8;
-            GPUData gd = new GPUData();
-            gd.Update();
-        }
-        public class GPUData
-        {
-            public void Update()
+            while (true)    //无限循环等待输入
             {
-                CheckGPU();
-                string json = JsonConvert.SerializeObject(GPUlist);
-                string gpucom = "getgpu";
                 string input = Console.ReadLine().ToLower();
-                if (gpucom == input)
+                switch (input)
                 {
-                    Console.WriteLine(json);
+                    case "getgpu":
+                        Console.WriteLine(GetGPUData());
+                        break;
+                    default:
+                        Console.WriteLine("Input error.Please check!");
+                        break;
                 }
-                else
+            }
+        }
+
+        
+
+        private static string GetGPUData()      //取得所有GPU型号和每个GPU sensor的type、name、value
+        {
+           
+            int x, y;
+            int hardwareCount;
+            int sensorcount;
+            Computer computerHardware = new Computer();
+            computerHardware.GPUEnabled = true;
+            computerHardware.Open();
+            hardwareCount = computerHardware.Hardware.Count();
+            List<GPU> GPUData = new List<GPU>();
+            for (x = 0; x < hardwareCount; x++)
+            {
+                GPU _gpu = new GPU
                 {
-                    Console.WriteLine("Input error.please check!");
-                }
-
-                Console.ReadKey();
-            }
-
-            public class GPUStates
-            {
-                public string type;
-                public string speed;
-                public string temp;
-
-            }
-            ArrayList GPUlist = new ArrayList() { };
-            private void GPUinfo(string name, string Type, string tempvalue, string fanvalue)
-            {
-                GPUStates GP = new GPUStates();
-                if (Type == "GpuAti" || Type == "GpuNvidia")
-                {
-                    GP.type = name;
-                    GP.temp = tempvalue + " °C";
-                    GP.speed = fanvalue + " RPM";
-                }
-                GPUlist.Add(GP);
-            }
-
-            private OpenHardwareMonitor.Hardware.Computer computerHardware = new OpenHardwareMonitor.Hardware.Computer();
-
-            private void CheckGPU()
-            {
-                string name = string.Empty;
-                string gpuType = string.Empty;
-                string sensortype = string.Empty;
-                string tempvalue = string.Empty;
-                string fanvalue = string.Empty;
-                int x, y;
-                int hardwareCount;
-                int sensorcount;
-                computerHardware.FanControllerEnabled = true;
-                computerHardware.GPUEnabled = true;
-                computerHardware.Open();
-                hardwareCount = computerHardware.Hardware.Count();
-                for (x = 0; x < hardwareCount; x++)
-                  {
-                    name = computerHardware.Hardware[x].Name;
-                    gpuType = computerHardware.Hardware[x].HardwareType.ToString();//判断是A卡还是N卡条件              
-                    sensorcount = computerHardware.Hardware[x].Sensors.Count();
-                    if (sensorcount > 0)
+                    Name = computerHardware.Hardware[x].Name,
+                    HardwareType = computerHardware.Hardware[x].HardwareType.ToString()//判断是A卡还是N卡条件              
+                };
+                sensorcount = computerHardware.Hardware[x].Sensors.Count(); ;
+                 
+                    for (y = 0; y < sensorcount; y++)
                     {
-                        for (y = 0; y < sensorcount; y++)
-                        {
-                            if (computerHardware.Hardware[x].Sensors[y].SensorType.ToString() == "Temperature")
-                            {
-                                tempvalue = computerHardware.Hardware[x].Sensors[y].Value.ToString();
-                            }
-                            if (computerHardware.Hardware[x].Sensors[y].SensorType.ToString() == "Fan")
-                            {
-                                fanvalue = computerHardware.Hardware[x].Sensors[y].Value.ToString();
-                            }
-                        }
-
+                    Sensor _sensor = new Sensor
+                    {
+                        Name = computerHardware.Hardware[x].Sensors[y].Name.ToString(),
+                        Value = computerHardware.Hardware[x].Sensors[y].Value.ToString(),
+                        Type = computerHardware.Hardware[x].Sensors[y].SensorType.ToString(),
+                        Max = computerHardware.Hardware[x].Sensors[y].Max ?? 0,
+                        Min = computerHardware.Hardware[x].Sensors[y].Min ?? 0,
+                        Index = computerHardware.Hardware[x].Sensors[y].Index
+                    };
+                    _gpu.Sensors.Add(_sensor);
                     }
-                    GPUinfo(name, gpuType, tempvalue, fanvalue);
-                }
+                GPUData.Add(_gpu);
+                computerHardware.Close();
             }
+           return JsonConvert.SerializeObject(GPUData);
+
         }
 
     }
