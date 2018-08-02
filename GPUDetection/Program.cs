@@ -25,10 +25,18 @@ namespace GPUDetection
                 switch (input)
                 {
                     case "getgpu":
-                        Console.WriteLine(GetGPUData());
+                        try
+                        {
+                            Console.WriteLine(GetGPUData());
+                        }
+                        catch(Exception e)
+                        {
+                            Console.Error.WriteLine("Exception!", e.Message);
+                            Console.Error.WriteLine(e.StackTrace);
+                        }
                         break;
                     default:
-                        Console.WriteLine("Input error.Please check!");
+                        Console.Error.WriteLine("Input error. Please check!");
                         break;
                 }
             }
@@ -70,8 +78,8 @@ namespace GPUDetection
                     _gpu.Sensors.Add(_sensor);
                     }
                 GPUData.Add(_gpu);
-                computerHardware.Close();
             }
+           computerHardware.Close();
            return JsonConvert.SerializeObject(GPUData);
 
         }
